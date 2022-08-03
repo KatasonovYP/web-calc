@@ -1,41 +1,56 @@
-import { useState } from 'react';
-import SquareButton from './components/SquareButton';
+import ACTIONS from "./actions";
+import { useReducer } from "react";
+import reducer from "./hooks/reducer";
+import { ICalculatorState } from "./models";
+import formatOperand from "./utility/formatter";
+import DigitButton from "./components/DigitButton";
+import OperationButton from "./components/OperationButton";
 
 function App() {
-  const [line, setLine] = useState("0")
-  const cleanLine = () => setLine("0")
-  const backspaceLine = () => setLine(prev => prev.length > 1 ? prev.slice(0, -1) : "0")
-  const setAnswer = () => setLine(prev => eval(prev))
-  const btns = [
-    { sym: ' % ', setExpr: setLine }, 
-    { sym: 'CE', setExpr: cleanLine }, 
-    { sym: 'C', setExpr: cleanLine }, 
-    { sym: '←', setExpr: backspaceLine },
-    { sym: '7', setExpr: setLine },
-    { sym: '8', setExpr: setLine },
-    { sym: '9', setExpr: setLine },
-    { sym: ' * ', setExpr: setLine },
-    { sym: '4', setExpr: setLine },
-    { sym: '5', setExpr: setLine },
-    { sym: '6', setExpr: setLine },
-    { sym: ' - ', setExpr: setLine },
-    { sym: '1', setExpr: setLine },
-    { sym: '2', setExpr: setLine },
-    { sym: '3', setExpr: setLine },
-    { sym: ' + ', setExpr: setLine },
-    { sym: 's', setExpr: setLine },
-    { sym: '0', setExpr: setLine },
-    { sym: '.', setExpr: setLine },
-    { sym: ' = ', setExpr: setAnswer }
-  ]
+  const [{ currentOperand, previousOperand, operation }, dispatch]: [ICalculatorState, Function] = useReducer(reducer, {
+    previousOperand: null,
+    operation: null,
+    currentOperand: null,
+    overwrite: false,
+  });
   return (
-    <div className='w-1/3 m-auto flex flex-col align-middle justify-center'>
-      <div className='container border px-2 py-4 mb-4 mt-10 text-3xl rounded-2xl'>
-        {line}
+    <div className="calculator-grid">
+      <div className="output">
+        <div className="previous-operand">
+          {formatOperand(previousOperand)} {operation}
+        </div>
+        <div className="current-operand">{formatOperand(currentOperand)}</div>
       </div>
-      <div className="grid grid-cols-4 gap-1">
-        { btns.map(btn => <SquareButton sym={btn.sym} setExpr={btn.setExpr} />) }
-      </div>
+      <button
+        className="col-span-2"
+        onClick={() => dispatch({ type: ACTIONS.CLEAR })}
+      >
+        AC
+      </button>
+      <button onClick={() => dispatch({ type: ACTIONS.DELETE_DIGIT })}>
+        DEL
+      </button>
+      <OperationButton operation={"/"} dispatch={dispatch} />
+      <DigitButton digit={"1"} dispatch={dispatch} />
+      <DigitButton digit={"2"} dispatch={dispatch} />
+      <DigitButton digit={"3"} dispatch={dispatch} />
+      <OperationButton operation={"*"} dispatch={dispatch} />
+      <DigitButton digit={"4"} dispatch={dispatch} />
+      <DigitButton digit={"5"} dispatch={dispatch} />
+      <DigitButton digit={"6"} dispatch={dispatch} />
+      <OperationButton operation={"+"} dispatch={dispatch} />
+      <DigitButton digit={"7"} dispatch={dispatch} />
+      <DigitButton digit={"8"} dispatch={dispatch} />
+      <DigitButton digit={"9"} dispatch={dispatch} />
+      <OperationButton operation={"-"} dispatch={dispatch} />
+      <DigitButton digit={"."} dispatch={dispatch} />
+      <DigitButton digit={"0"} dispatch={dispatch} />
+      <button
+        className="col-span-2"
+        onClick={() => dispatch({ type: ACTIONS.EVALUATE })}
+      >
+        =
+      </button>
     </div>
   );
 }
